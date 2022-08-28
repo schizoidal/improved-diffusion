@@ -186,7 +186,18 @@ class TensorBoardOutputFormat(KVWriter):
         if self.writer:
             self.writer.Close()
             self.writer = None
+import wandb
+class WandbOutputFormat(KVWriter):
+    def __init__(self, dir):
+        wandb.init(project='diffusion')
 
+    def writekvs(self, kvs):
+        d={k:v for k,v in kvs.items()}
+        print(d)
+        wandb.log(d)
+
+    def close(self):
+        pass  
 
 def make_output_format(format, ev_dir, log_suffix=""):
     os.makedirs(ev_dir, exist_ok=True)
@@ -200,6 +211,8 @@ def make_output_format(format, ev_dir, log_suffix=""):
         return CSVOutputFormat(osp.join(ev_dir, "progress%s.csv" % log_suffix))
     elif format == "tensorboard":
         return TensorBoardOutputFormat(osp.join(ev_dir, "tb%s" % log_suffix))
+    elif format == "wandb":
+        return WandbOutputFormat(osp.join(ev_dir, "wandb%s" % log_suffix))
     else:
         raise ValueError("Unknown format specified: %s" % (format,))
 
@@ -457,10 +470,10 @@ def configure(dir=None, format_strs=None, comm=None, log_suffix=""):
     rank = get_rank_without_mpi_import()
     if rank > 0:
         log_suffix = log_suffix + "-rank%03i" % rank
-
+    
     if format_strs is None:
         if rank == 0:
-            format_strs = os.getenv("OPENAI_LOG_FORMAT", "stdout,log,csv").split(",")
+            format_strs = os.getenv("OPENAI_LOG_FORMAT", "stdout,log,csv,wandb").split(",")
         else:
             format_strs = os.getenv("OPENAI_LOG_FORMAT_MPI", "log").split(",")
     format_strs = filter(None, format_strs)
