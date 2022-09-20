@@ -40,6 +40,7 @@ def load_data(
             all_class_names.extend(x)
         sorted_classes = {x: i for i,x in enumerate(sorted(set(all_class_names)))}
         classes = [list(map(sorted_classes.get, x)) for x in class_names]
+        classes = [np.sum(np.power(2,np.array(c))) for c in classes]
 
     dataset = ImageDataset(
         image_size,
