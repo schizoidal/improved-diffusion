@@ -35,12 +35,19 @@ def load_data(
         # sorted_classes = {x: i for i, x in enumerate(sorted(set(class_names)))}
         # classes = [sorted_classes[x] for x in class_names]
         class_names = [bf.basename(path).split("_")[:-1] for path in all_files]
-        all_class_names = []
-        for x in class_names:
-            all_class_names.extend(x)
-        sorted_classes = {x: i for i,x in enumerate(sorted(set(all_class_names)))}
-        classes = [list(map(sorted_classes.get, x)) for x in class_names]
-        classes = [np.sum(np.power(2,np.array(c))) for c in classes]
+        # all_class_names = []
+        # for x in class_names:
+        #     all_class_names.extend(x)
+        # sorted_classes = {x: i for i,x in enumerate(sorted(set(all_class_names)))}
+        # classes = [list(map(sorted_classes.get, x)) for x in class_names]
+        # classes = [np.sum(np.power(2,np.array(c))) for c in classes]
+        class_bits = {'red':0,'green':1,'blue':2,'one':0,'two':4,'three':8}
+        classes = []
+        for file_class in class_names:
+            class_id = 0
+            for c in file_class:
+                class_id += class_bits[c]
+            classes.append(class_id)
 
     dataset = ImageDataset(
         image_size,
